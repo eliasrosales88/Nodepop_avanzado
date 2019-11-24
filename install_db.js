@@ -1,10 +1,8 @@
 'use strict';
 
-const mongoose = require('mongoose');
-const readLine = require('readline');
-const async = require('async');
-
 const db = require('./lib/connectMongoose');
+const Usuario = require('./models/Usuario');
+const readLine = require('readline');
 
 // Cargamos las definiciones de todos nuestros modelos
 const Anuncio = require('./models/Anuncio');
@@ -16,6 +14,7 @@ db.once('open', async function () {
       
       // Inicializar nuestros modelos
       await initAnuncios();
+      await initUsuarios();
       
     } else {
       console.log('DB install aborted!');
@@ -54,3 +53,15 @@ async function initAnuncios() {
   return numLoaded;
 
 }
+
+async function initUsuarios() {
+  await Usuario.deleteMany();
+  await Usuario.insertMany([
+    {
+      email: 'admin@example.com',
+      password: await Usuario.hashPassword('1234')
+    }
+  ]);
+
+}
+
