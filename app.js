@@ -1,13 +1,18 @@
 'use strict';
-
+const dbConnect = require("./dbConnection");
 const express = require('express');
 const path = require('path');
 const logger = require('morgan');
 const cookieParser = require('cookie-parser');
 const bodyParser = require('body-parser');
 
+
+
+
+dbConnect();
+
 /* jshint ignore:start */
-const db = require('./lib/connectMongoose');
+// const db = require('./lib/connectMongoose');
 /* jshint ignore:end */
 
 // Cargamos las definiciones de todos nuestros modelos
@@ -33,7 +38,10 @@ app.use('/', require('./routes/index'));
 app.use('/anuncios', require('./routes/anuncios'));
 
 // API v1
+const loginApiController = require("./routes/apiv1/loginApiController");
+
 app.use('/apiv1/anuncios', require('./routes/apiv1/anuncios'));
+app.post("/apiv1/authenticate", loginApiController.loginJWT);
 
 // catch 404 and forward to error handler
 app.use(function (req, res, next) {

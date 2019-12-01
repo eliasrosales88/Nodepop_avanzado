@@ -1,11 +1,11 @@
 'use strict';
 
 const db = require('./lib/connectMongoose');
-const Usuario = require('./models/Usuario');
 const readLine = require('readline');
 
 // Cargamos las definiciones de todos nuestros modelos
 const Anuncio = require('./models/Anuncio');
+const Usuario = require('./models/Usuario');
 
 db.once('open', async function () {
   try {
@@ -40,7 +40,7 @@ function askUser(question) {
 
 async function initAnuncios() {
 
-  await Anuncio.remove({});
+  await Anuncio.deleteMany({});
   console.log('Anuncios borrados.');
 
   // Cargar anuncios.json
@@ -59,6 +59,10 @@ async function initUsuarios() {
   await Usuario.insertMany([
     {
       email: 'admin@example.com',
+      password: await Usuario.hashPassword('1234')
+    },
+    {
+      email: 'user@example.com',
       password: await Usuario.hashPassword('1234')
     }
   ]);
