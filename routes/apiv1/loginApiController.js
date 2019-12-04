@@ -26,13 +26,9 @@ class LoginApiController {
         expiresIn: '2d'
       });
 
-      // // respondemos
+      // respondemos
       res.json({ success: true, token: token });
       
-      
-      // throw new Error("chao");
-
-
     } catch(err) {
       next(err);
     }
