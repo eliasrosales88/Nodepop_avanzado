@@ -7,18 +7,15 @@ const cookieParser = require('cookie-parser');
 const bodyParser = require('body-parser');
 
 
+const app = express();
+/**
+ * Setup de i18n
+ */
+const i18n = require("./lib/i18nConfigure")();
+
 
 
 dbConnect();
-
-/* jshint ignore:start */
-// const db = require('./lib/connectMongoose');
-/* jshint ignore:end */
-
-// Cargamos las definiciones de todos nuestros modelos
-require('./models/Anuncio');
-
-const app = express();
 
 // view engine setup
 app.set('views', path.join(__dirname, 'views'));
@@ -33,9 +30,19 @@ app.use(express.static(path.join(__dirname, 'public')));
 // Global Template variables
 app.locals.title = 'NodePop';
 
+// Inicializamos despues del cookieParser()
+app.use(i18n.init);
+
+
+
+// Cargamos las definiciones de todos nuestros modelos
+require('./models/Anuncio');
+
+
 // Web
 app.use('/', require('./routes/index'));
 app.use('/anuncios', require('./routes/anuncios'));
+app.use('/change-locale', require('./routes/change-locale'));
 
 // API v1
 const loginApiController = require("./routes/apiv1/loginApiController");
