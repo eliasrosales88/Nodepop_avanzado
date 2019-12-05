@@ -1,6 +1,6 @@
 
 # NodePop
-
+  
 [Demo](/anuncios) of the methods (this link works only if you run the project)
 
 Api for the iOS/Android apps.
@@ -28,6 +28,25 @@ To start a single instance:
 To start in development mode:
 
     npm run dev (including nodemon & debug log)
+
+
+## Internationalization  
+You can go to [Demo](/anuncios) and check the **EN** and **ES** links to change language.
+
+## JWT API
+  **Authentication:** Send a POST request to `http://localhost:3000/apiv1/authenticate`
+  
+  ```json
+  {
+    "success": true,
+    "token": "HEADER.PAYLOAD.SIGNATURE"
+  }
+  ```
+
+  **Verify authentication:** Send a GET request to `http://localhost:3000/apiv1/anuncios`
+
+  - Send in the body of the request **key:** token **value:** HEADER.PAYLOAD.SIGNATURE(jwt)
+
 
 ## Test
 
