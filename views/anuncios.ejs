@@ -1,15 +1,23 @@
 <% include _header %>
+<link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css" integrity="sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh" crossorigin="anonymous">
+<style>
+  body{
+    padding: 0 !important;
+  }
+</style>
 
-<div class="navbar navbar-default navbar-fixed-top">
+<div class="navbar navbar-default navbar-fixed-top bg-dark">
   <div class="container">
     <div class="navbar-header"><a href="/" class="navbar-brand">Nodeapi</a></div>
-    <% getLocales().forEach( locale => { %>
-      <a href="/change-locale/<%= locale %>"><%= locale %></a>&nbsp;
-    <% }) %>
   </div>
 </div>
 
 <div class="container">
+    <div class="mb-4">
+        <% getLocales().forEach( locale => { %>
+          <a class="bg-danger p-3" href="/change-locale/<%= locale %>"><%= locale %></a>&nbsp;
+        <% }) %>
+    </div>
   <div class="row">
     <div class="col-md-12">
       <h1><%= __("List of adverts") %></h1>
@@ -20,25 +28,27 @@
   <div class="row">
     <div class="col-md-12">
       <table class="table table-hover">
-        <thead><tr>
-          <th><%= __("Name") %></th>
-          <th><%= __("Selling") %></th>
-          <th style="text-align: right"><%= __("Price") %></th>
-          <th><%= __("Photo") %></th>
-          <th><%= __("Tags") %></th>
-          <th>#</th>
-        </tr></thead>
-        <tbody>
-<% anuncios.forEach(anuncio => { %>
+        <thead>
           <tr>
-            <td><%= anuncio.nombre %></td>
-            <td><%= anuncio.venta ? __("Yes") : __("No") %></td>
-            <td style="text-align: right"><%= anuncio.precio / 100 %>€</td>
-            <td><img src="<%= anuncio.foto %>"></td>
-            <td><%= anuncio.tags %></td>
-            <td><%= anuncio._id %></td>
+            <th><%= __("Name") %></th>
+            <th><%= __("Selling") %></th>
+            <th style="text-align: right"><%= __("Price") %></th>
+            <th><%= __("Photo") %></th>
+            <th><%= __("Tags") %></th>
+            <th>#</th>
           </tr>
-<% }) %>
+        </thead>
+        <tbody>
+          <% anuncios.forEach(anuncio => { %>
+            <tr>
+              <td><%= anuncio.nombre %></td>
+              <td><%= anuncio.venta ? __("Yes") : __("No") %></td>
+              <td style="text-align: right"><%= anuncio.precio / 100 %>€</td>
+              <td><img src="<%= anuncio.foto %>"></td>
+              <td><%= anuncio.tags %></td>
+              <td><%= anuncio._id %></td>
+            </tr>
+          <% }) %>
         </tbody>
       </table>
 
