@@ -9,12 +9,11 @@ const upload = multer({ dest: 'uploads/' });
 const fs = require("fs");
 const path = require('path');
 
+const connectionPromise = require("../../lib/connectAMQP");
+
+const queueName = "tareas";
 
 const jwtAuth = require("../../lib/jwtAuth");
-
-
-
-
 
 router.get('/', jwtAuth(), (req, res, next) => {
 
@@ -82,13 +81,62 @@ router.post('/', upload.single('foto'), jwtAuth(), async function (req, res, nex
 
     //copiamos el archivo a la carpeta definitiva de fotos
     fs.createReadStream('./uploads/' + req.file.filename)
-      .pipe(fs.createWriteStream('./public/images/anuncios/' + req.file.originalname));
-
-    //borramos el archivo temporal creado
-    fs.unlink(path.join(__dirname, '../../uploads/' + req.file.filename), (err) => {
+      .pipe(fs.createWriteStream('./public/images/anuncios/' + req.file.filename + "_" + req.file.originalname));
+          
+      //borramos el archivo temporal creado
+      const imageTmp = path.join(__dirname, '../../uploads/' + req.file.filename);
+    
+    fs.unlink(imageTmp, (err) => {
       if (err) throw err;
       console.log(req.file.filename + ' was deleted');
     });
+
+    const imagePath = path.join(__dirname, '../../public/images/anuncios/' + req.file.filename + "_" + req.file.originalname);
+    console.log('imagePath',imagePath);
+
+    //enviamos la tarea a la cola
+    main().catch(err => { console.log("Hubo un error:", err) });
+
+    async function main() {
+
+      // conectamos al servidor AMQP
+      const conn = await connectionPromise;
+
+      // conectar a un canal
+      const channel = await conn.createChannel()  // con esto voy a hablar con las colas
+
+      // asegurar que la cola existe
+      await channel.assertQueue(queueName, {
+        durable: true // la cola sobrevive a reinicios del broker
+      });
+
+
+      let sendAgain = true;
+
+      try {
+        // mandar un mensaje
+        const image = {
+          path: imagePath
+        };
+
+        // antes de mandar el siguiente mensaje verifico si debo hacerlo
+        if (!sendAgain) {
+          console.log("Esperando a");
+          await new Promise(resolve => channel.on("drain", () => { resolve }))
+
+        }
+
+        sendAgain = channel.sendToQueue(queueName, Buffer.from(JSON.stringify(image)), {
+          persistent: true // el mensaje sobrevive a reinicios del broker (rabbitmq es el broker).
+        });
+
+        console.log(`La ruta ${image.path} se ha enviado ${sendAgain}`);
+
+      } catch (error) {
+        console.log(error);
+        process.exit(1);
+      }
+    }
 
     // respondemos
     res.json({ success: true, result: advertTosave });

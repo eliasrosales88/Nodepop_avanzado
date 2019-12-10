@@ -1,4 +1,5 @@
 "use strict";
+const jimp = require("jimp");
 
 // ESTAMOS USANDO EL PATRON WORK QUEUE (colas de trabajo)
 // https://www.rabbitmq.com/getstarted.html
@@ -27,13 +28,28 @@ async function main() {
   channel.prefetch(1);
 
   // me suscribo a una cola
-  channel.consume(queueName, msg => {
-    console.log(msg.content.toString());
+  channel.consume(queueName, async img => {
 
-    // hago el trabajo que corresponda a este worker(redimensionar una image, llamar a una api. etc...)
-    setTimeout(()=>{
-
-      channel.ack(msg); // ya he procesado el mensaje, le confirmo para que se borre de la cola
-    }, 500)
+    try {
+      const imgPath = JSON.parse(img.content.toString()).path;
+      console.log("imgPath", imgPath);
+      
+      // hago el trabajo que corresponda a este worker(redimensionar una image, llamar a una api. etc...)
+      
+      // Read the image.
+      const image = await jimp.read(imgPath);
+  
+      // Resize the image to width and height to 100.
+      await image.resize(100, 100);
+      
+      // Save and overwrite the image
+      await image.writeAsync(imgPath);
+  
+      channel.ack(img); // ya he procesado el mensaje, le confirmo para que se borre de la cola
+    } catch (err) {
+      console.log("Fail", err);
+      
+    }
+   
   });
 }
