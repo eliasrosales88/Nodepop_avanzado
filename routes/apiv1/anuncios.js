@@ -4,9 +4,16 @@ const express = require('express');
 const router = express.Router();
 const mongoose = require('mongoose');
 const Anuncio = mongoose.model('Anuncio');
+const multer = require('multer')
+const upload = multer({ dest: 'uploads/' });
+const fs = require("fs");
+const path = require('path');
 
 
 const jwtAuth = require("../../lib/jwtAuth");
+
+
+
 
 
 router.get('/', jwtAuth(), (req, res, next) => {
@@ -54,5 +61,42 @@ router.get('/', jwtAuth(), (req, res, next) => {
 router.get('/tags', function (req, res) {
   res.json({ ok: true, allowedTags: Anuncio.allowedTags() });
 });
+
+
+// Post images
+router.post('/', upload.single('foto'), jwtAuth(), async function (req, res, next) {
+  // req.file is the `image` file
+  // req.body will hold the text fields, if there were any
+  try {
+    const data = req.body;
+
+    const advertTosave = {
+      nombre: data.nombre,
+      venta: data.venta,
+      precio: data.precio,
+      foto: req.file.originalname,
+      tags: data.tags,
+    }
+    await Anuncio.createRecord(advertTosave);
+
+
+    //copiamos el archivo a la carpeta definitiva de fotos
+    fs.createReadStream('./uploads/' + req.file.filename)
+      .pipe(fs.createWriteStream('./public/images/anuncios/' + req.file.originalname));
+
+    //borramos el archivo temporal creado
+    fs.unlink(path.join(__dirname, '../../uploads/' + req.file.filename), (err) => {
+      if (err) throw err;
+      console.log(req.file.filename + ' was deleted');
+    });
+
+    // respondemos
+    res.json({ success: true, result: advertTosave });
+  } catch (error) {
+    res.json({ success: false });
+  }
+
+});
+
 
 module.exports = router;
