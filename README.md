@@ -48,6 +48,20 @@ You can go to [Demo](/anuncios) and check the **EN** and **ES** links to change 
   - Send in the body of the request **key:** token **value:** HEADER.PAYLOAD.SIGNATURE(jwt)
 
 
+## RabbitMQ  
+
+  The implementation of **rabbitmq** was made using **docker**
+      
+      docker run -d --hostname=mq --name mq -p 8080:15672 -p 5672:5672 rabbitmq:3-management
+
+After running docker image of rabbitmq you can go to **http://localhost:8080/**
+
+You can send **POST** requests to http://localhost:3000/apiv1/anuncios after being authenticated to post a new advert and start the queue to resize the image sent in the request. This resquest subscribes to a queue.
+
+To consume the task is required to run in the terminal
+
+    nodemon queue/consumer.js
+
 ## Test
 
     npm test (pending to create, the client specified not to do now)
